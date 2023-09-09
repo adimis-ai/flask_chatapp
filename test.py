@@ -177,12 +177,12 @@ def main():
     password = "test_password"
 
     # Register a new user
-    register_response = register_user(username, age, email, password, interests)
-    if register_response.status_code == 200:
-        print("\nUser registered successfully")
-    else:
-        print("\nFailed to register user")
-        return
+    #register_response = register_user(username, age, email, password, interests)
+    #if register_response.status_code == 200:
+    #    print("\nUser registered successfully")
+    #else:
+    #    print("\nFailed to register user")
+    #    return
 
     # Log in the user
     login_response = login_user(username, password)
@@ -220,5 +220,5 @@ def main():
     sio.disconnect()
 
 if __name__ == "__main__":
-    test_get_suggested_friends(123)
+    #test_get_suggested_friends(123)
     main()
