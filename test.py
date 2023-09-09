@@ -21,6 +21,15 @@ def register_user(username, age, email, password, interests):
         "interests": interests,
     }
     response = requests.post(f"{base_url}/api/register/", json=data)
+    
+    if response.status_code == 200:
+        print("User registered successfully")
+    elif response.status_code == 400:
+        error_message = response.json().get("error")
+        print(f"Failed to register user: {error_message}")
+    else:
+        print("An unexpected error occurred while registering the user")
+
     return response
 
 # Function to log in a user
@@ -31,11 +40,16 @@ def login_user(username, password):
         "password": password,
     }
     response = requests.post(f"{base_url}/api/login/", json=data)
+    
     if response.status_code == 200:
         token = response.json().get("access_token")
         print("User logged in successfully")
+    elif response.status_code == 401:
+        error_message = response.json().get("error")
+        print(f"Failed to log in user: {error_message}")
     else:
-        print("Failed to log in user")
+        print("An unexpected error occurred while logging in the user")
+
     return response
 
 # Function to test friend recommendation system
@@ -134,7 +148,7 @@ def main():
     interests = None
     age = None
     if username == "damon":
-        email = "damon@gmail.com"
+        email = "adimis@gmail.com"
         age = "22"
         interests = {
             "singing": 91,

@@ -20,7 +20,7 @@ bcrypt = Bcrypt()
 # SECTION: MongoDB Configuration
 client = MongoClient("mongodb+srv://adimis:root@alicememory.49huuqd.mongodb.net/?retryWrites=true&w=majority")
 
-chat_db = client.get_database("ChatDB-14")
+chat_db = client.get_database("ChatDB-15")
 users_collection = chat_db.get_collection("users")
 chat_messages_collection = chat_db.get_collection("chat_messages")
 
@@ -145,6 +145,10 @@ def get_chat_history(sender_username, receiver_username):
     except PyMongoError as e:
         print(f"Error retrieving chat history: {str(e)}")
 
+# Function to get a user by email
+def get_user_by_email(email):
+    return users_collection.find_one({"email": email})
+
 # SECTION: Routes
 @app.route('/api/register/', methods=['POST'])
 def register():
@@ -157,6 +161,16 @@ def register():
 
     print(f"Registering user: username={username}, email={email}")
 
+    # Check if a user with the same email or username already exists
+    existing_user_by_email = get_user_by_email(email)
+    existing_user_by_username = get_user_by_username(username)
+
+    if existing_user_by_email:
+        return jsonify({"error": "Email already exists. Please use a different email."}), 400
+    elif existing_user_by_username:
+        return jsonify({"error": "Username already exists. Please choose a different username."}), 400
+
+    # If no user with the same email or username exists, create a new user
     new_user = User(username, age, email, password)
     new_user.interests = interests
 
@@ -169,7 +183,7 @@ def register():
         return jsonify({"message": "User registered successfully"}), 200
     else:
         print("Username or email already exists")
-        return jsonify({"message": "Username or email already exists"}), 400
+        return jsonify({"error": "Registration failed. Please try again later."}), 500
 
 @app.route('/api/login/', methods=['POST'])
 def login():
@@ -188,10 +202,10 @@ def login():
         users_collection.update_one({"username": username}, {"$set": {"online": True, "last_activity": datetime.now()}})
 
         access_token = create_access_token(identity=username)
-        return jsonify({"access_token": access_token}), 200
+        return jsonify({"message": "Login successful", "access_token": access_token}), 200
     else:
         print("Invalid credentials")
-        return jsonify({"message": "Invalid credentials"}), 401
+        return jsonify({"error": "Invalid username or password. Please try again."}), 401
 
 @app.route('/api/online-users/')
 @jwt_required()
