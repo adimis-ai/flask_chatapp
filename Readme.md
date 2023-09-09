@@ -1,223 +1,107 @@
 # Flask Chat Application Documentation
 
-## Introduction
-
-Welcome to the documentation for the Flask Chat Application. This chat application is built using Flask and enables users to create accounts, log in, view online users, initiate chats with online users, and send messages in real-time. The documentation covers the API endpoints, functionality, and recommended algorithms.
-
 ## Table of Contents
+1. [Introduction](#introduction)
+2. [Project Overview](#project-overview)
+3. [Installation](#installation)
+4. [Usage](#usage)
+5. [Endpoints](#endpoints)
+6. [Socket.IO Events](#socketio-events)
+7. [Friend Recommendation System](#friend-recommendation-system)
+8. [Testing](#testing)
 
-1. [API Endpoints](#api-endpoints)
-   - [User Registration](#user-registration)
-   - [User Login](#user-login)
-   - [Get Online Users](#get-online-users)
-   - [Get All Chats](#get-all-chats)
-   - [Get Chat](#get-all-chats)
-   - [Start a Chat](#start-a-chat)
-   - [Send a Message](#send-a-message)
-   - [Friends Recommendation](#friends-recommendation)
+---
 
-2. [Implementation Details](#implementation-details)
-   - [User Registration](#user-registration-implementation)
-   - [User Login](#user-login-implementation)
-   - [Get Online Users](#get-online-users-implementation)
-   - [Get All Chats](#get-all-chats-implementation)
-   - [Get Chat](#get-all-chats-implementation)
-   - [Start a Chat](#start-a-chat-implementation)
-   - [Send a Message](#send-a-message-implementation)
-   - [Friends Recommendation](#friends-recommendation-implementation)
+## 1. Introduction <a name="introduction"></a>
 
-## API Endpoints
+This documentation provides a detailed overview of the Flask Chat Application project. The project consists of a Flask-based chat application with real-time messaging capabilities using Socket.IO. Additionally, it includes a friend recommendation system based on user interests.
 
-### User Registration
+## 2. Project Overview <a name="project-overview"></a>
 
-- **Endpoint**: `POST /api/register/`
-- **Functionality**: Allows users to create an account by providing necessary information such as username, email, and password.
-- **Input**: `RegistrationRequest` data.
-- **Output**: 
-  - If the registration is successful, return a success message or status code.
-  - If there are validation errors or the username/email is already taken, return appropriate error messages or status codes.
+The Chat Application project consists of three main components:
 
-### User Login
+- `app.py`: The Flask application that handles user registration, login, real-time messaging, and friend recommendation system integration.
+- `friend_rec_sys.py`: The friend recommendation system module that suggests friends for users based on their interests.
+- `test.py`: A testing script that allows users to interact with the chat application, register, log in, send messages, and receive friend recommendations.
 
-- **Endpoint**: `POST /api/login/`
-- **Functionality**: Allows users to log in to their account by providing their credentials (username/email and password).
-- **Input**: `LoginRequest` data.
-- **Output**:
-  - If the login is successful, return an authentication token or a success message with the user details.
-  - If the credentials are invalid, return an error message or status code.
+The project's key features include user registration, login, real-time messaging using Socket.IO, online/offline status tracking, and friend recommendations with explanations based on user interests.
 
-### Get Online Users
+## 3. Installation <a name="installation"></a>
 
-- **Endpoint**: `GET /api/online-users/`
-- **Functionality**: Retrieves a list of all online users who are currently available for chat.
-- **Input**: None.
-- **Output**:
-  - Returns a list of online user objects with their details, such as username and status.
+To set up and run the Chat Application project, follow these steps:
 
-### Get all Chats of the User:
+1. Clone the project repository:
 
-- **Endpoint**: `GET /api/chats/`
-- **Functionality**: Retrieves a list of all chat conversations for the currently authenticated user.
-- **Input**: None.
-- **Output**:
-  - Returns a list of chat objects, each containing details of the chat, including its ID, participant IDs, and the last message in the conversation.
+   ```
+   git clone <repository_url>
+   ```
 
-### Get Chat:
+2. Install the required Python packages:
 
-- **Endpoint**: `GET /api/chat/<chat_id>`
-- **Functionality**: Retrieves the details of a specific chat conversation identified by its `chat_id`.
-- **Input**: Chat ID as a parameter.
-- **Output**:
-  - Returns a chat object containing details of the chat, including its ID, participant IDs, and the list of messages in the conversation.
+   ```
+   pip install -r requirements.txt
+   ```
 
-### Start a Chat
+3. Ensure you have MongoDB installed and running. You can either set up a local MongoDB instance or use a cloud-based service like MongoDB Atlas.
 
-- **Endpoint**: `POST /api/chat/start/`
-- **Functionality**: Allows a user to initiate a chat with another user who is online and available.
-- **Input**: `ChatStartRequest` data.
-- **Output**:
-  - If the recipient is online and available, return a success message or status code.
-  - If the recipient is offline or unavailable, return an error message or status code.
+4. Update the MongoDB connection string in `app.py` to point to your MongoDB instance:
 
-### Send a Message
+   ```python
+   client = MongoClient("mongodb+srv://<username>:<password>@<cluster_url>/<db_name>?retryWrites=true&w=majority")
+   ```
 
-- **Endpoint**: `WEBSOCKET /api/chat/send/`
-- **Functionality**: Allows a user to send and receive instant messages to another user who is online.
-- **Input**: WebSocket connection, `MessageSendRequest` data.
-- **Output**: WebSocket communication to send messages in real-time.
-- Description: Handles real-time message communication between users.
+5. Run the Flask application:
 
-### Friends Recommendation
+   ```
+   python app.py
+   ```
 
-- **Endpoint**: `GET /api/suggested-friends/<user_id>`
-- **Functionality**: Allows sending a GET request to the application with a user_id and returns the top 5 recommended friends for that user.
-- **Note**: This is a public API, and the user does not need to be signed in. Operations are not related to the application’s DB.
-- **Input**: User ID as a parameter.
-- **Output**: A JSON containing 5 user instances based on your recommendation algorithm.
+6. In a separate terminal, run the Socket.IO server:
 
-## Implementation Details:
+   ```
+   python -m flask run --host=0.0.0.0 --port=5000
+   ```
 
-### User Registration (Implementation)
+7. Open another terminal and run the testing script:
 
-1. **Collect User Information**: Receive user registration data (username, email, password) through a POST request.
+   ```
+   python test.py
+   ```
 
-2. **Validation**: Check if the provided data meets validation criteria. Ensure that the username and email are unique, and the password meets security requirements.
+## 4. Usage <a name="usage"></a>
 
-3. **Database Interaction**: Insert the new user's data into the database. Typically, hash the password before storing it for security.
+Once the project is set up, you can use the testing script (`test.py`) to interact with the chat application. Follow the prompts to register, log in, send messages, and receive friend recommendations.
 
-4. **Response**: Respond with a success message or status code if registration is successful. Provide appropriate error messages or status codes for validation failures.
+## 5. Endpoints <a name="endpoints"></a>
 
-### User Login (Implementation)
+The Flask application (`app.py`) exposes the following API endpoints:
 
-1. **Collect Login Information**: Receive user login data (username or email, password) through a POST request.
+- `/api/register/` (POST): Allows users to register with their username, age, email, password, and interests.
+- `/api/login/` (POST): Allows users to log in with their username and password.
+- `/api/online-users/` (GET): Returns a list of online users for the authenticated user.
+- `/api/get_chat_history/` (POST): Returns the chat history between the authenticated user and a specified receiver.
 
-2. **Authentication**: Validate the provided credentials by checking them against the stored user data in the database. Generate an authentication token (e.g., JWT) upon successful authentication.
+## 6. Socket.IO Events <a name="socketio-events"></a>
 
-3. **Response**: If authentication is successful, respond with an access token and user details in a `LoginResponse`. For invalid credentials, return an error message or status code.
+The chat application uses Socket.IO for real-time messaging. It includes the following Socket.IO events:
 
-### Get Online Users (Implementation)
+- `start_chat`: Initiates a chat session between two users.
+- `send_message`: Sends a message from one user to another.
+- `receive_message`: Receives a message in real-time.
+- `chat_started`: Indicates that a chat session has started successfully.
+- `chat_error`: Indicates an error in starting a chat session.
 
-1. **Database Query**: Query the database to find users with an `online` status set to `True`.
+## 7. Friend Recommendation System <a name="friend-recommendation-system"></a>
 
-2. **User Details**: Retrieve relevant user details (e.g., ID, username) for the online users found.
+The friend recommendation system (`friend_rec_sys.py`) provides friend recommendations based on user interests. It includes the following components:
 
-3. **Response**: Create an `OnlineUsersResponse` with the list of online user details and return it as a JSON response.
+- User interests are loaded from a JSON file (`users.json`) during initialization.
+- `get_user_interests(user_id)`: Retrieves interests for a specific user.
+- `explain_recommendation(user_id, recommended_friend_id)`: Generates an explanation for a friend recommendation based on common interests.
+- `preprocess_data(users_data)`: Standardizes age and interests data for recommendation.
+- `hybrid_recommendation_with_explanations(user_id, users_data, age_vector, interests_matrix, top_n=5)`: Recommends friends with explanations using a hybrid recommendation approach.
+- `suggested_friends(user_id)`: Exposes an API endpoint to retrieve friend recommendations with explanations for a given user ID.
 
-### Get all Chats of the User (Implementation)
+## 8. Testing <a name="testing"></a>
 
-1. **Authentication**: Ensure that the user making the request is authenticated and authorized to access their chat conversations.
-
-2. **Database Query**: Query the database to retrieve all chat conversations associated with the authenticated user. You will use the User model's chats field, which contains the IDs of the user's chats.
-
-3. **Response**: Create a response containing a list of chat objects, each representing a chat conversation. Include details such as the chat ID, participant IDs, and the last message in the chat. Return this response as a JSON object.
-
-### Get Chat (Implementation):
-
-1. **Authentication**: Ensure that the user making the request is authenticated and authorized to access the specified chat conversation.
-
-2. **Database Query**: Query the database to retrieve the chat conversation identified by the provided `chat_id`.
-
-3. **Response**: Create a response containing details of the chat conversation, including its ID, participant IDs, and the list of messages in the conversation. Return this response as a JSON object.
-
-### Start a Chat (Implementation)
-
-1. **Collect Recipient Information**: Receive a `ChatStartRequest` with the recipient's user ID through a POST request.
-
-2. **Database Update**: If the recipient is available, create a new chat record in the database. This record typically includes the IDs of both the sender and the recipient and an empty message list.
-
-3. **Response**: Respond with a `ChatStartResponse` containing details of the newly created chat, such as its ID and participant IDs.
-
-### Send a Message (Implementation)
-
-1. **WebSocket Communication**: Implement a WebSocket handler to manage WebSocket connections. Receive message data through WebSocket when a user sends a message.
-
-2. **Validation**: Validate the received message data to ensure it adheres to the required format and security standards.
-
-3. **Recipient Availability**: Ensure that users cannot send messages to offline users by validating the recipient's online status before sending the message.
-
-4. **Real-time Delivery**: Use the WebSocket connection to send the message to the intended recipient in real-time. Update the chat's message history in the database to record the message.
-
-### Friends Recommendation (Implementation)
-
-1. **User Data Retrieval**: Retrieve the user's profile data based on the provided `user_id` from your dataset.
-
-2. **Similarity Calculation**: Implement a recommendation algorithm that calculates user similarity with other users. This typically involves comparing interests and age.
-
-3. **Combine Scores**: Combine the similarity scores from content-based and collaborative filtering approaches, adjusting weights if necessary.
-
-4. **Sorting and Selection**: Sort the users by their combined similarity scores in descending order. Select the top 5 users as recommended friends.
-
-## Conclusion:
-
-This documentation provides an overview of the Flask Chat Application, its API endpoints, and implementation details. It serves as a guide for developers and users to understand and use the application effectively.
-
-## User Friends Data:
-``json
-{
-    "users": [
-        {
-            "id": 1,
-            "name": "User 1",
-            "age": 81,
-            "interests": {
-                "singing": 91,
-                "travelling": 88,
-                "dancing": 37
-            }
-        },
-        {
-            "id": 2,
-            "name": "User 2",
-            "age": 46,
-            "interests": {
-                "cooking": 81,
-                "computers": 18,
-                "cars": 83
-            }
-        },
-        {
-            "id": 3,
-            "name": "User 3",
-            "age": 79,
-            "interests": {
-                "travelling": 37,
-                "dancing": 29,
-                "computers": 36,
-                "cars": 10,
-                "cooking": 37
-            }
-        },
-        {
-            "id": 4,
-            "name": "User 4",
-            "age": 11,
-            "interests": {
-                "music": 61,
-                "photography": 46,
-                "dancing": 93,
-                "drawing": 41,
-                "cars": 72
-            }
-        },
-]}
-```
+The testing script (`test.py`) allows you to interact with the chat application. You can register, log in, send messages, and receive friend recommendations. To test the friend recommendation system, you can uncomment the `test_get_suggested_friends(user_id)` function call in the script.

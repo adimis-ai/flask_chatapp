@@ -51,11 +51,8 @@ def test_get_suggested_friends(user_id):
         # Check if the response contains the 'recommended_friends' key
         if 'recommended_friends' in data:
             recommended_friends = data['recommended_friends']
-            print(f'\nRecommended Friends for User {user_id}:')
-            for friend in recommended_friends:
-                friend_id = friend['friend_id']
-                explanation = friend['explanation']
-                print(f'Friend ID: {friend_id}, Explanation: {explanation}')
+            print(f'\nRecommended Friends for User {user_id}:', recommended_friends)
+
         else:
             print('\nError: Response does not contain recommended_friends')
     elif response.status_code == 404:
@@ -209,5 +206,5 @@ def main():
     sio.disconnect()
 
 if __name__ == "__main__":
-    #test_get_suggested_friends(123)
+    test_get_suggested_friends(123)
     main()

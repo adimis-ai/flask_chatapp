@@ -1,8 +1,8 @@
 import json
 import numpy as np
-from flask import Flask, jsonify, request
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
+import json
 
 # Load user data from the JSON file.
 with open('users.json', 'r') as json_file:
@@ -77,18 +77,16 @@ def suggested_friends(user_id):
     try:
         user_id = int(user_id)
     except ValueError:
-        return jsonify({'error': 'Invalid user_id format'}), 400
+        return json.dumps({'error': 'Invalid user_id'}), 400  # Return a JSON error response with a status code
 
     print(f"Received request for user {user_id}...")
 
-    if user_id not in [user['id'] for user in users_data['users']]:
-        print(f"User {user_id} not found in the data...")
-        return jsonify({'error': 'User not found'}), 404
-
+    # Get friend recommendations with explanations
     recommendations_with_explanations = hybrid_recommendation_with_explanations(user_id, users_data, age_vector, interests_matrix)
-    
-    result = {'recommended_friends': recommendations_with_explanations}
-    
-    return jsonify(result)
 
+    # Prepare the JSON response
+    recommended_friends = [{'friend_id': recommendation['friend_id'], 'explanation': recommendation['explanation']} for recommendation in recommendations_with_explanations]
 
+    response = {'recommended_friends': recommended_friends}
+
+    return json.dumps(response), 200  # Return the JSON response with a 200 status code
