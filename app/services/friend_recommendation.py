@@ -1,11 +1,15 @@
+# app/services/recommendation.py
 import json
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 import json
+import os
 
 # Load user data from the JSON file.
-with open('users.json', 'r') as json_file:
+file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'users.json')
+
+with open(file_path, 'r') as json_file:
     users_data = json.load(json_file)
 
 # Function to get user's interests

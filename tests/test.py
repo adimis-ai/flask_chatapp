@@ -177,12 +177,12 @@ def main():
     password = "test_password"
 
     # Register a new user
-    #register_response = register_user(username, age, email, password, interests)
-    #if register_response.status_code == 200:
-    #    print("\nUser registered successfully")
-    #else:
-    #    print("\nFailed to register user")
-    #    return
+    register_response = register_user(username, age, email, password, interests)
+    if register_response.status_code == 200:
+        print("\nUser registered successfully")
+    else:
+        print("\nFailed to register user")
+        pass
 
     # Log in the user
     login_response = login_user(username, password)
@@ -190,7 +190,6 @@ def main():
         print("\nUser logged in successfully")
     else:
         print("\nFailed to log in user")
-        return
 
     # Get a list of online users
     online_users_response = get_online_users()
@@ -203,22 +202,23 @@ def main():
     # Start a chat with another user (enter the receiver's username)
     receiver_username = input("\nEnter the username of the receiver: ")
 
-    # Connect to the Socket.IO server
-    sio.connect(base_url)
+    if token:
+        # Connect to the Socket.IO server
+        sio.connect(base_url)
 
-    # Emit the 'start_chat' event to the server
-    sio.emit("start_chat", {"username": username, "receiver": receiver_username})
+        # Emit the 'start_chat' event to the server
+        sio.emit("start_chat", {"username": username, "receiver": receiver_username})
 
-    # Send a message (enter the message to send)
-    while True:
-        message = input("\nEnter a message (or 'exit' to quit): ")
-        if message == "exit":
-            break
-        send_message(username, receiver_username, message)
+        # Send a message (enter the message to send)
+        while True:
+            message = input("\nEnter a message (or 'exit' to quit): ")
+            if message == "exit":
+                break
+            send_message(username, receiver_username, message)
 
-    # Disconnect from the Socket.IO server
-    sio.disconnect()
+        # Disconnect from the Socket.IO server
+        sio.disconnect()
 
 if __name__ == "__main__":
-    #test_get_suggested_friends(123)
+    test_get_suggested_friends(123)
     main()
