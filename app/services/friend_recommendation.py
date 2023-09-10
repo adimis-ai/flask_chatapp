@@ -12,6 +12,31 @@ file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file_
 with open(file_path, 'r') as json_file:
     users_data = json.load(json_file)
 
+""" users.json file
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "User 1",
+            "age": 81,
+            "interests": {
+                "singing": 91,
+                "travelling": 88,
+                "dancing": 37
+            }
+        },
+        {
+            "id": 2,
+            "name": "User 2",
+            "age": 46,
+            "interests": {
+                "cooking": 81,
+                "computers": 18,
+                "cars": 83
+            }
+        },
+"""
+
 # Function to get user's interests
 def get_user_interests(user_id):
     user_index = user_id - 1  # User IDs are 1-based
@@ -63,8 +88,9 @@ def hybrid_recommendation_with_explanations(user_id, users_data, age_vector, int
 
     for i in top_similar_users_indices:
         friend_id = users_data['users'][i]['id']
+        friend_name = users_data['users'][i]['name']  # Get the friend's name
         explanation = explain_recommendation(user_id, friend_id)
-        recommendations_with_explanations.append({'friend_id': friend_id, 'explanation': explanation})
+        recommendations_with_explanations.append({'friend_name': friend_name, 'explanation': explanation})
 
     return recommendations_with_explanations
 
@@ -89,7 +115,7 @@ def suggested_friends(user_id):
     recommendations_with_explanations = hybrid_recommendation_with_explanations(user_id, users_data, age_vector, interests_matrix)
 
     # Prepare the JSON response
-    recommended_friends = [{'friend_id': recommendation['friend_id'], 'explanation': recommendation['explanation']} for recommendation in recommendations_with_explanations]
+    recommended_friends = [{'friend_name': recommendation['friend_name'], 'explanation': recommendation['explanation']} for recommendation in recommendations_with_explanations]
 
     response = {'recommended_friends': recommended_friends}
 

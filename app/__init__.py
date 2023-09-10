@@ -14,7 +14,7 @@ scheduler = BackgroundScheduler()
 bcrypt = Bcrypt()
 jwt = JWTManager(app)
 
-client = MongoClient(app.config['MONGODB_URI'])
+client = MongoClient(app.config['MONGODB_ATLAS_URI'])
 chat_db = client.get_database(app.config['DATABASE_NAME'])
 users_collection = chat_db.get_collection(app.config['USERS_COLLECTION'])
 chat_messages_collection = chat_db.get_collection(app.config['CHAT_MESSAGES_COLLECTION'])

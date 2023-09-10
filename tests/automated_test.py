@@ -1,7 +1,6 @@
 import requests
 import json
 import socketio
-import logging
 from colorama import init, Fore, Style
 from datetime import datetime
 
@@ -16,10 +15,6 @@ class Config:
 # Initialize the socket.io client
 sio = socketio.Client()
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 # Helper functions for API requests
 def api_post(endpoint, data=None, headers=None):
     url = f"{Config.BASE_URL}/{endpoint}"
@@ -28,8 +23,29 @@ def api_post(endpoint, data=None, headers=None):
         response.raise_for_status()  # Raise an exception for HTTP errors
         return response
     except requests.exceptions.RequestException as e:
-        logger.error(f"HTTP Request Error: {e}")
+        print(f"HTTP Request Error: {e}")
         return None
+
+# Function to test friend recommendation system
+def get_suggested_friends(user_id):
+    # Send a GET request to the server to get suggested friends for the user with the given user_id
+    response = requests.get(f'{Config.BASE_URL}/api/suggested-friends/{user_id}')
+
+    # Check the response status code
+    if response.status_code == 200:
+        # If the status code is 200 (OK), parse the JSON response
+        data = response.json()
+
+        # Check if the response contains the 'recommended_friends' key
+        if 'recommended_friends' in data:
+            recommended_friends = data['recommended_friends']
+            return recommended_friends
+        else:
+            raise ValueError('Response does not contain recommended_friends')
+    elif response.status_code == 404:
+        raise ValueError(f'User with ID {user_id} not found')
+    else:
+        raise ValueError(f'Request failed with status code {response.status_code}')
 
 # Function to register a new user
 def register_user(username, password):
@@ -60,10 +76,18 @@ def login_user(username, password):
     
     if response:
         token = response.json().get("access_token")
-        logger.info(f"User: {username} logged in successfully")
+        print(f"User: {username} logged in successfully")
         return token
     else:
-        logger.error(f"Failed to log in user {username}")
+        print(f"Failed to log in user {username}")
+
+# Function to get a list of online users
+def get_online_users(token):
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+    response = requests.get(f"{Config.BASE_URL}/api/online-users/", headers=headers)
+    return response.json()
 
 # Send a message using socket.io
 def send_message(username, receiver_username, message):
@@ -138,15 +162,29 @@ def handle_received_message(data):
     content = data.get('content')
 
     if sender and content:
-        logger.info(f"Received message from {sender}: {content}")
+        print(f"Received message from {sender}: {content}")
     else:
-        logger.warning("Incomplete message data received")
+        print("Incomplete message data received")
+
+# Function to print online and offline users with colors
+def print_online_users(online_users_response):
+    online_users = online_users_response.get('online_users', [])
+    if not online_users:
+        print(f"{Fore.RED}No online users found.{Style.RESET_ALL}")
+    else:
+        for user in online_users:
+            username = user.get("username", "Unknown")
+            online = user.get("online", False)
+            status = "Online" if online else "Offline"
+            style = Fore.GREEN if online else Fore.RED
+            formatted_user = f"{style}{username} ({status}){Style.RESET_ALL}"
+            print(formatted_user)
 
 def interactive_chat(user1_token, user2_token):
     try:
         while True:
-            action = input("Select an action:\n1. Send message as User1\n2. Send message as User2\n3. View Chat History\n4. Exit\n")
-            
+            action = input("Select an action:\n1. Send message as User1\n2. Send message as User2\n3. View Chat History\n4. Get Suggested Friends\n5. Get Online Users\n6. Exit\n")
+
             if action == "1":
                 message = input(f"Enter a message for {Config.USER2_USERNAME}: ")
                 send_message(Config.USER1_USERNAME, Config.USER2_USERNAME, message)
@@ -159,9 +197,25 @@ def interactive_chat(user1_token, user2_token):
                 user2_chat_history = get_chat_history(Config.USER1_USERNAME, user2_token)
                 print_chat_history(user2_chat_history, Config.USER2_USERNAME, Config.USER1_USERNAME)
             elif action == "4":
+                entered_user_id = input("Enter user_id (1,2,3,4, etc.): ")
+                suggestions = get_suggested_friends(entered_user_id)
+                print(f"Friends Suggestion for user_id: {entered_user_id}:\n")
+                if suggestions:
+                    for suggestion in suggestions:
+                        friend_name = suggestion.get('friend_name')
+                        explanation = suggestion.get('explanation')
+                        formatted_suggestion = f"{Fore.YELLOW}Recommended Friend {friend_name}: {explanation}{Style.RESET_ALL}"
+                        print(formatted_suggestion)
+                else:
+                    print(f"{Fore.RED}No friend suggestions found for user_id {entered_user_id}.{Style.RESET_ALL}")
+            elif action == "5":
+                online_users_response = get_online_users(user1_token)
+                print("Online Users:")
+                print_online_users(online_users_response)
+            elif action == "6":
                 break
             else:
-                logger.warning("Invalid action. Please select 1, 2, 3, or 4.")
+                print("Invalid action. Please select 1, 2, 3, 4, 5, or 6.")
     except KeyboardInterrupt:
         pass
 
@@ -173,9 +227,9 @@ if __name__ == "__main__":
     
     if user1_token and user2_token:
         sio.connect(Config.BASE_URL)
-        logger.info(f"{Config.USER1_USERNAME} and {Config.USER2_USERNAME} connected to the Socket.IO server")
+        print(f"{Config.USER1_USERNAME} and {Config.USER2_USERNAME} connected to the Socket.IO server")
         
         interactive_chat(user1_token, user2_token)
         
         sio.disconnect()
-        logger.info(f"{Config.USER1_USERNAME} and {Config.USER2_USERNAME} disconnected from the Socket.IO server")
+        print(f"{Config.USER1_USERNAME} and {Config.USER2_USERNAME} disconnected from the Socket.IO server")
